@@ -11,7 +11,7 @@ The information on TikTok Research API can be found here: https://developers.tik
 
 
 ```python
-pip install git+https://github.com/tiktok/tiktok-research-api-wrapper.git@main#subdirectory=tiktok-research-api-python
+pip install TikTokResearchApi
 ```
 
 ### Loading the Wrapper
