@@ -49,7 +49,7 @@ research_api <- TikTokResearchAPI$new(client_key, client_secret, qps)
 #### Integration Steps:
 1. Download the Git Wrapper
 ```bash
-pip install TikTokResearchAPI
+pip install git+https://github.com/tiktok/tiktok-research-api-wrapper.git@main#subdirectory=tiktok-research-api-python
 ```
 2. Usage
 
