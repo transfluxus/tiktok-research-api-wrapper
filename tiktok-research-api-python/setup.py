@@ -2,7 +2,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="TiktokResearchApi",
+    name="TikTokResearchApi",
     version="1.0.0",
     description="A Python package for interacting with the TikTok Research API",
     long_description=open("README.md").read(),
