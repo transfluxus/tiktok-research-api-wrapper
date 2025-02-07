@@ -2,6 +2,9 @@
 
 [![License](https://img.shields.io/badge/License-Tiktok%20-blue.svg?style=flat-square)](https://github.com/tiktok/tiktok-research-api-wrapper/blob/main/LICENSE.md)
 
+> [!NOTE]
+> Changes in the python api!
+
 # Introduction
 
 The TikTok Research API Wrapper is a ToolKit built in R and Python to facilitate the use of [TikTok Research API](https://developers.tiktok.com/doc/research-api-get-started/). Our Wrapper Toolkit supports the following endpoints: Videos, User Info, Video Comments, User Liked Videos, User Pinned Videos, User Followers, User Following, and Reposted Videos.
@@ -21,7 +24,7 @@ R and Python are among the most popular languages among researchers. The TikTok 
 #### Integration Steps:
 1. Download the Git Wrapper
 ```bash
-install_git("git@github.com:tiktok/tiktok-research-api-wrapper.git", , subdir = "tiktok-research-api-r")
+install_git("git@github.com:transfluxus/tiktok-research-api-wrapper.git", , subdir = "tiktok-research-api-r")
 
 ```
 2. Usage
@@ -46,21 +49,6 @@ research_api <- TikTokResearchAPI$new(client_key, client_secret, qps)
 
   - 3.0.0
   
-#### Integration Steps:
-1. Download the Git Wrapper
-```bash
-pip install TikTokResearchApi
-```
-2. Usage
-
-```bash
-from tiktok_research_api import *
-qps = 5 #rate limiter
-client_key = os.getenv("CLIENT_KEY", "")
-client_secret = os.getenv("CLIENT_SECRET", "")
-# Initialize the API client
-api = TikTokResearchAPI(client_key, client_secret, qps)
-```
 
 ## Give feedback
 

@@ -13,10 +13,6 @@ The information on TikTok Research API can be found here: https://developers.tik
 ### Let's install the package
 
 
-```python
-pip install TikTokResearchApi
-```
-
 ### Loading the Wrapper
 
 
