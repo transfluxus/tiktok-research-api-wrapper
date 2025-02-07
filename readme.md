@@ -50,14 +50,10 @@ research_api <- TikTokResearchAPI$new(client_key, client_secret, qps)
   - 3.0.0
   
 
-## Give feedback
-
-- If you want to report bugs or issues related to the wrapper, please contact us via Github [Issues](https://github.com/tiktok/tiktok-research-api-wrapper/issues) page.
-
 
 ## References
 
 Here are the detailed documentation for currently supported programming languages.
 
 - R:  please refer to [tiktok-research-api-r/readme.MD](https://github.com/tiktok/tiktok-research-api-wrapper/blob/main/tiktok-research-api-r/readme.MD)
-- Python:  please refer to [tiktok-research-api-python/readme.MD](https://github.com/tiktok/tiktok-research-api-wrapper/blob/main/tiktok-research-api-python/readme.MD)
+- Python:  please refer to [tiktok-research-api-python/readme.MD](https://github.com/transfluxus/tiktok-research-api-wrapper/blob/main/tiktok-research-api-python/readme.MD)
