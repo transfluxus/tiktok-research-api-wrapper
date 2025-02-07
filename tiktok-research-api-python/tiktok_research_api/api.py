@@ -156,8 +156,8 @@ class TikTokResearchAPI:
                             break
                         time.sleep(1)
                         continue
-                else:
-                    raise Exception(f"{response.status_code=}; {error_code=}; {error_msg=}")
+                    else:
+                        raise Exception(f"{response.status_code=}; {error_code=}; {error_msg=}")
 
                 response_data = response.json().get("data", {})
                 videos = response_data.get("videos", [])
