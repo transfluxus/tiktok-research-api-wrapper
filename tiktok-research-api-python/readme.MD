@@ -1,6 +1,9 @@
 # TikTok Research API Python Package
 This Python package provides a client library for interacting with the TikTok Research API.
 
+> [!NOTE]
+> Changes to the original repo from TikTok to the python implementation.  Search requests are only repeated, when the response is 500 (internal error) and the client can poll again in a second. When the server responses, that the query or parameters are invalid, there is no point in staying in the loop and keeping to poll...  
+
 ## Getting Started
 
 Below we provide the examples of the queries using the Wrapper, illustrate its functionality, as well as provide some examples of the types of analysis possible with TikTok Research API
