@@ -147,15 +147,17 @@ class TikTokResearchAPI:
                 error_code = response.json().get("error", {}).get("code", None)
                 error_msg = response.json().get("error", {}).get("message", None)
                 if error_code != APIErrorResponse.OK:
+                    if response.status_code == 500:
+                        # Polling while we wait for backend cache to populate
+                        retries += 1
+                        if retries >= MAX_RETRIES:
+                            logging.error(f"{error_msg}")
+                            max_retries_hit = True
+                            break
+                        time.sleep(1)
+                        continue
+                else:
                     raise Exception(f"{response.status_code=}; {error_code=}; {error_msg=}")
-                    # Polling while we wait for backend cache to populate
-                    # retries += 1
-                    # if retries >= MAX_RETRIES:
-                    #     logging.error(f"{error_msg}")
-                    #     max_retries_hit = True
-                    #     break
-                    # time.sleep(1)
-                    # continue
 
                 response_data = response.json().get("data", {})
                 videos = response_data.get("videos", [])
