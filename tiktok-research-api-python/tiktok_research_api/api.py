@@ -147,7 +147,8 @@ class TikTokResearchAPI:
                 error_code = response.json().get("error", {}).get("code", None)
                 error_msg = response.json().get("error", {}).get("message", None)
                 if error_code != APIErrorResponse.OK:
-                    if response.status_code == 500:
+                    if response.status_code == 500 or (
+                            error_code == 'invalid_params' and error_msg.startswith("Search Id")):
                         # Polling while we wait for backend cache to populate
                         retries += 1
                         if retries >= MAX_RETRIES:
