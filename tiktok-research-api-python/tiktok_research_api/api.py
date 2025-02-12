@@ -32,6 +32,7 @@ class TikTokResearchAPI:
         self.qps = qps
         self.requests = 0
         self.start_time = datetime.now()
+        self.max_query_retries = 30
 
     def headers(self):
         return {
@@ -139,27 +140,30 @@ class TikTokResearchAPI:
                     optional_fields_provided[key] = value
 
             retries = 0
-            MAX_RETRIES = 60
             page = 0
             while True:
                 self.rate_limiter()
                 response = requests.post(endpoint, json=body, headers=self.headers())
                 error_code = response.json().get("error", {}).get("code", None)
                 error_msg = response.json().get("error", {}).get("message", None)
+                if response.status_code == 429:
+                    raise Exception("Rate limit reached")
                 if error_code != APIErrorResponse.OK:
                     if response.status_code == 500 or (
                             error_code == 'invalid_params' and error_msg.startswith("Search Id")):
                         # Polling while we wait for backend cache to populate
                         retries += 1
-                        if retries >= MAX_RETRIES:
+                        if retries >= self.max_query_retries:
                             logging.error(f"{error_msg}")
                             max_retries_hit = True
                             break
-                        time.sleep(1)
+                        time.sleep(retries * 1.2)
                         continue
                     else:
                         raise Exception(f"{response.status_code=}; {error_code=}; {error_msg=}")
 
+                # TEMP TEST
+                print(f"retries: {retries} - {response}")
                 response_data = response.json().get("data", {})
                 videos = response_data.get("videos", [])
                 aggregate_videos.extend(videos)
@@ -187,7 +191,7 @@ class TikTokResearchAPI:
                     # Move to the next date chunk
                 current_start = current_end + timedelta(days=1)
         
-        return aggregate_videos, search_id, root_cursor, has_more, start_str, end_str
+        return aggregate_videos, search_id, root_cursor, has_more, start_str, end_str, None
 
     def query_user_info(self, user_info_request, fetch_all_pages=None):
         endpoint = (
