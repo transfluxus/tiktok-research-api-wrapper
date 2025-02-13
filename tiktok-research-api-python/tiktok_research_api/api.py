@@ -165,7 +165,7 @@ class TikTokResearchAPI:
                             logging.error(f"{error_msg}")
                             max_retries_hit = True
                             break
-                        time.sleep(retries * 1.2)
+                        time.sleep(self.retry_sleep_time)
                         continue
                     else:
                         raise Exception(f"{response.status_code=}; {error_code=}; {error_msg=}")
