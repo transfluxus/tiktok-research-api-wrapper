@@ -90,7 +90,7 @@ class TikTokResearchAPI:
         current_time = datetime.now()
         elapsed_time = (current_time - self.start_time).total_seconds()
 
-        if elapsed_time > 1:
+        if elapsed_time > self.retry_sleep_time:
             # Reset the counter and start time if the time window has passed
             self.requests = 0
             self.start_time = current_time
@@ -158,7 +158,8 @@ class TikTokResearchAPI:
                     raise Exception("Rate limit reached")
                 if error_code != APIErrorResponse.OK:
                     if response.status_code == 500 or (
-                            error_code == 'invalid_params' and error_msg.startswith("Search Id")):
+                            error_code == 'invalid_params' and error_msg.startswith(
+                        "Search Id")) or error_msg == "Invalid count or cursor":
                         # Polling while we wait for backend cache to populate
                         retries += 1
                         if retries >= self.max_query_retries:
@@ -186,6 +187,7 @@ class TikTokResearchAPI:
                 if not fetch_all_pages or not has_more or len(aggregate_videos) >= max_total:
                     break
                 print(f"Page {page} got {len(videos)} videos and has_more {has_more}", flush=True)
+                logging.info(f"Aggregated videos: {len(aggregate_videos)}")
                 retries = 0  # Reset retries on success
                 page += 1
 
