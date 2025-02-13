@@ -15,8 +15,14 @@ from .errors import *
 
 __all__ = ["TikTokResearchAPI"]
 
+
 class TikTokResearchAPI:
-    def __init__(self, client_key, client_secret,qps=10):
+    def __init__(self,
+                 client_key,
+                 client_secret,
+                 qps=10,
+                 max_query_retries=30,
+                 retry_sleep_time=6):
         if not client_key:
             raise ValueError("client_key is required")
         if not client_secret:
@@ -32,7 +38,8 @@ class TikTokResearchAPI:
         self.qps = qps
         self.requests = 0
         self.start_time = datetime.now()
-        self.max_query_retries = 30
+        self.max_query_retries = max_query_retries
+        self.retry_sleep_time = retry_sleep_time
 
     def headers(self):
         return {
@@ -52,10 +59,11 @@ class TikTokResearchAPI:
                 return False
             return True
         except Exception as e:
-             logging.error(
-                    f"[fetch data] received exception parsing json exception={e}, response body={response.text}, response_headers={response.headers}"
-                )
-             return False
+            logging.error(
+                f"[fetch data] received exception parsing json exception={e}, response body={response.text}, response_headers={response.headers}"
+            )
+            return False
+
     def get_client_token(self):
         endpoint = f"{self.url}/v2/oauth/token/"
         token_headers = {"Content-Type": "application/x-www-form-urlencoded"}
@@ -86,7 +94,7 @@ class TikTokResearchAPI:
             # Reset the counter and start time if the time window has passed
             self.requests = 0
             self.start_time = current_time
-        
+
         if self.requests >= self.qps:
             # Enforce delay if the limit is reached
             wait_time = 1 - elapsed_time
@@ -95,7 +103,7 @@ class TikTokResearchAPI:
             # Reset the counter and start time after waiting
             self.requests = 0
             self.start_time = datetime.now()
-        
+
         self.requests += 1
 
     def refresh_token(self):
@@ -106,14 +114,14 @@ class TikTokResearchAPI:
         # Convert string dates to datetime objects for internal calculations
         current_start = datetime.strptime(video_request.start_date, "%Y%m%d")
         end_date = datetime.strptime(video_request.end_date, "%Y%m%d")
-        
+
         aggregate_videos = []
         search_id = None
         root_cursor = None
         has_more = False
         max_retries_hit = False
         show_search_id = True
-        
+
         while current_start <= end_date:
             # Break if max_total is reached
             max_total = getattr(video_request, "max_total", 1000000)
@@ -172,7 +180,7 @@ class TikTokResearchAPI:
                 search_id = response_data.get("search_id", None)
 
                 if search_id and show_search_id:
-                    logging.info(f"SearchID: {search_id}")                    
+                    logging.info(f"SearchID: {search_id}")
                     show_search_id = False
 
                 if not fetch_all_pages or not has_more or len(aggregate_videos) >= max_total:
@@ -188,9 +196,9 @@ class TikTokResearchAPI:
             if max_retries_hit:
                 break
             else:
-                    # Move to the next date chunk
+                # Move to the next date chunk
                 current_start = current_end + timedelta(days=1)
-        
+
         return aggregate_videos, search_id, root_cursor, has_more, start_str, end_str, None
 
     def query_user_info(self, user_info_request, fetch_all_pages=None):
@@ -247,7 +255,7 @@ class TikTokResearchAPI:
             value = getattr(user_liked_videos_request, key)
             if value is not None:
                 body[key] = value
-    
+
         while True:
             self.rate_limiter()
             response = requests.post(endpoint, json=body, headers=self.headers())
@@ -334,7 +342,7 @@ class TikTokResearchAPI:
         return aggregate_pinned_videos
 
     def query_user_reposted_videos(
-        self, reposted_videos_request, fetch_all_pages=False
+            self, reposted_videos_request, fetch_all_pages=False
     ):
         endpoint = f"{self.url}/v2/research/user/reposted_videos/?fields={reposted_videos_request.fields}"
         body = {"username": reposted_videos_request.username}
