@@ -2,6 +2,7 @@
 #
 # This source code is licensed under the MIT license found in
 # the LICENSE file in the root directory of this source tree.
+from json import JSONDecodeError
 
 import requests
 import urllib
@@ -152,8 +153,16 @@ class TikTokResearchAPI:
             while True:
                 self.rate_limiter()
                 response = requests.post(endpoint, json=body, headers=self.headers())
-                error_code = response.json().get("error", {}).get("code", None)
-                error_msg = response.json().get("error", {}).get("message", None)
+                try:
+                    response_data = response.json()
+                except JSONDecodeError as exc:
+                    print(exc)
+                    print(response.status_code)
+                    time.sleep(2)
+                    retries += 1
+                    continue
+                error_code = response_data.get("error", {}).get("code", None)
+                error_msg = response_data.get("error", {}).get("message", None)
                 if response.status_code == 429:
                     raise Exception("Rate limit reached")
                 if error_code != APIErrorResponse.OK:
@@ -173,7 +182,7 @@ class TikTokResearchAPI:
 
                 # TEMP TEST
                 print(f"retries: {retries} - {response}")
-                response_data = response.json().get("data", {})
+                response_data = response_data.get("data", {})
                 videos = response_data.get("videos", [])
                 aggregate_videos.extend(videos)
                 has_more = response_data.get("has_more", False)
