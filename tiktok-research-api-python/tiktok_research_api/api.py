@@ -41,6 +41,7 @@ class TikTokResearchAPI:
         self.start_time = datetime.now()
         self.max_query_retries = max_query_retries
         self.retry_sleep_time = retry_sleep_time
+        self.logger = logging.getLogger("TikTokResearchAPI")
 
     def headers(self):
         return {
@@ -156,8 +157,8 @@ class TikTokResearchAPI:
                 try:
                     response_data = response.json()
                 except JSONDecodeError as exc:
-                    print(exc)
-                    print(response.status_code)
+                    self.logger.error(exc)
+                    self.logger.error(response.status_code, "sleeping for 2 sec...")
                     time.sleep(2)
                     retries += 1
                     continue
@@ -172,7 +173,7 @@ class TikTokResearchAPI:
                         # Polling while we wait for backend cache to populate
                         retries += 1
                         if retries >= self.max_query_retries:
-                            logging.error(f"{error_msg}")
+                            self.logger.error(f"{error_msg}")
                             max_retries_hit = True
                             break
                         time.sleep(self.retry_sleep_time)
@@ -181,7 +182,6 @@ class TikTokResearchAPI:
                         raise Exception(f"{response.status_code=}; {error_code=}; {error_msg=}")
 
                 # TEMP TEST
-                print(f"retries: {retries} - {response}")
                 response_data = response_data.get("data", {})
                 videos = response_data.get("videos", [])
                 aggregate_videos.extend(videos)
@@ -195,8 +195,8 @@ class TikTokResearchAPI:
 
                 if not fetch_all_pages or not has_more or len(aggregate_videos) >= max_total:
                     break
-                print(f"Page {page} got {len(videos)} videos and has_more {has_more}", flush=True)
-                logging.info(f"Aggregated videos: {len(aggregate_videos)}")
+                self.logger.info(f"Page {page} got {len(videos)} videos and has_more {has_more}")
+                self.logger.info(f"Aggregated videos: {len(aggregate_videos)}", flush=True)
                 retries = 0  # Reset retries on success
                 page += 1
 
