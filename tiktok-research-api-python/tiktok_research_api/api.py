@@ -196,7 +196,7 @@ class TikTokResearchAPI:
                 if not fetch_all_pages or not has_more or len(aggregate_videos) >= max_total:
                     break
                 self.logger.info(f"Page {page} got {len(videos)} videos and has_more {has_more}")
-                self.logger.info(f"Aggregated videos: {len(aggregate_videos)}", flush=True)
+                self.logger.info(f"Aggregated videos: {len(aggregate_videos)}")
                 retries = 0  # Reset retries on success
                 page += 1
 
