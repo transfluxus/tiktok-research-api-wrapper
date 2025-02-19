@@ -91,15 +91,18 @@ class TikTokResearchAPI:
     def rate_limiter(self):
         current_time = datetime.now()
         elapsed_time = (current_time - self.start_time).total_seconds()
-
+        # print(f"{elapsed_time=}")
         if elapsed_time > self.retry_sleep_time:
             # Reset the counter and start time if the time window has passed
             self.requests = 0
             self.start_time = current_time
+            # print("resetting start requests/time")
+
+        # print(f"{self.requests=}, {self.qps=}")
 
         if self.requests >= self.qps:
             # Enforce delay if the limit is reached
-            wait_time = 1 - elapsed_time
+            wait_time = max(1,1 - elapsed_time)
             logging.info(f"Rate limit reached. Waiting for {wait_time:.2f} seconds...")
             time.sleep(wait_time)
             # Reset the counter and start time after waiting
@@ -190,12 +193,16 @@ class TikTokResearchAPI:
                 search_id = response_data.get("search_id", None)
 
                 if search_id and show_search_id:
-                    self.logger.debug(f"SearchID: {search_id}")
+                    logging.debug(f"SearchID: {search_id}")
                     show_search_id = False
 
                 if not fetch_all_pages or not has_more or len(aggregate_videos) >= max_total:
                     break
-                self.logger.info(f"Page {page} got {len(videos)} videos (retries: {retries}) (aggregated {len(aggregate_videos)}) and has_more {has_more}")
+                self.logger.info(
+                    f"Page {page} got {len(videos)} videos (retries: {retries}) (aggregated {len(aggregate_videos)}) and has_more {has_more}")
+
+                #self.logger.info(f"Page {page} got {len(videos)} videos and has_more {has_more}")
+                #self.logger.info(f"Aggregated videos: {len(aggregate_videos)}")
                 retries = 0  # Reset retries on success
                 page += 1
 
