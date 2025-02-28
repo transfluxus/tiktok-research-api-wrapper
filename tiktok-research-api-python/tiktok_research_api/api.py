@@ -2,6 +2,7 @@
 #
 # This source code is licensed under the MIT license found in
 # the LICENSE file in the root directory of this source tree.
+from collections import defaultdict
 from json import JSONDecodeError
 
 import requests
@@ -42,6 +43,7 @@ class TikTokResearchAPI:
         self.max_query_retries = max_query_retries
         self.retry_sleep_time = retry_sleep_time
         self.logger = logging.getLogger("TikTokResearchAPI")
+        self.requests_counter: defaultdict = defaultdict(int)
 
     def headers(self):
         return {
@@ -157,6 +159,7 @@ class TikTokResearchAPI:
             while True:
                 self.rate_limiter()
                 response = requests.post(endpoint, json=body, headers=self.headers())
+                self.requests_counter["query_videos"] += 1
                 try:
                     response_data = response.json()
                 except JSONDecodeError as exc:
