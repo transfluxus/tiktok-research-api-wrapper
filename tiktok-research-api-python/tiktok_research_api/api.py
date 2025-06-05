@@ -23,7 +23,7 @@ class TikTokResearchAPI:
                  client_key,
                  client_secret,
                  qps=10,
-                 max_query_retries=30,
+                 max_query_retries=20,
                  retry_sleep_time=6):
         if not client_key:
             raise ValueError("client_key is required")
@@ -104,7 +104,7 @@ class TikTokResearchAPI:
 
         if self.requests >= self.qps:
             # Enforce delay if the limit is reached
-            wait_time = max(1,1 - elapsed_time)
+            wait_time = max(1, 1 - elapsed_time)
             logging.info(f"Rate limit reached. Waiting for {wait_time:.2f} seconds...")
             time.sleep(wait_time)
             # Reset the counter and start time after waiting
@@ -171,7 +171,12 @@ class TikTokResearchAPI:
                 error_code = response_data.get("error", {}).get("code", None)
                 error_msg = response_data.get("error", {}).get("message", None)
                 if response.status_code == 429:
-                    raise Exception("Rate limit reached")
+                    if retries >= self.max_query_retries:
+                        raise Exception("Rate limit reached")
+                    time.sleep(0.5)
+                    retries += 1
+                    continue
+
                 if error_code != APIErrorResponse.OK:
                     if response.status_code == 500 or (
                             error_code == 'invalid_params' and error_msg.startswith(
@@ -187,9 +192,9 @@ class TikTokResearchAPI:
                     else:
                         raise Exception(f"{response.status_code=}; {error_code=}; {error_msg=}")
 
-                # TEMP TEST
                 response_data = response_data.get("data", {})
                 videos = response_data.get("videos", [])
+                self.logger.debug(f"Num received videos: {len(videos)}")
                 aggregate_videos.extend(videos)
                 has_more = response_data.get("has_more", False)
                 root_cursor = response_data.get("cursor", None)
@@ -204,8 +209,8 @@ class TikTokResearchAPI:
                 self.logger.info(
                     f"Page {page} got {len(videos)} videos (retries: {retries}) (aggregated {len(aggregate_videos)}) and has_more {has_more}")
 
-                #self.logger.info(f"Page {page} got {len(videos)} videos and has_more {has_more}")
-                #self.logger.info(f"Aggregated videos: {len(aggregate_videos)}")
+                # self.logger.info(f"Page {page} got {len(videos)} videos and has_more {has_more}")
+                # self.logger.info(f"Aggregated videos: {len(aggregate_videos)}")
                 retries = 0  # Reset retries on success
                 page += 1
 
